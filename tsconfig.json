@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "declaration": true,
+    "outDir": "./lib",
+    "strict": true,
+    "moduleResolution": "node"
+  },
+  "include": ["src/index.ts"]
+  // "include": ["src/**/*"]
+  // "exclude": ["src/**/*.spec.*"]
+}
