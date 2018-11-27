@@ -27,7 +27,8 @@
     "maybe",
     "typescript",
     "result",
-    "fp"
+    "fp",
+    "adt"
   ],
   "author": "Simon Korzunov",
   "license": "MIT",

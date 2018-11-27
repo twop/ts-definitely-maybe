@@ -1,10 +1,14 @@
-import { Union, of, GenericValType } from 'ts-union';
+import { Union, of, GenericValType, Of, Generic } from 'ts-union';
 import { reverseCurry, returnSelf } from './utils';
 
-const M = Union(val => ({
-  Nothing: of(),
-  Just: of(val)
-}));
+export type MaybeRec = { Nothing: Of<[void]>; Just: Of<[Generic]> };
+
+const M = Union(
+  (val): MaybeRec => ({
+    Nothing: of(),
+    Just: of(val)
+  })
+);
 
 export type MaybeVal<T> = GenericValType<T, typeof M.T>;
 
