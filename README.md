@@ -1,10 +1,16 @@
 # ts-definitely-maybe
 
+Exposes minimal set of helpers to work with `Maybe`, `Result` union types + a `pipe` function. Based on [ts-union](https://github.com/twop/ts-union) library.
+
 ### NOTE: work in progress
 
-### The goal is to expose minimal set of helpers to work with `Maybe`, `Result` types + a `pipe` (reversed `compose`) function. Based on ts-union library.
+## Installation
 
-# Code snippets. TODO make a proper api article
+```
+npm add ts-definitely-maybe ts-union
+```
+
+NOTE: Requires peer dependency on [ts-union](https://github.com/twop/ts-union) + uses features from typescript 3.0 (such as `unknown` type)
 
 ## `Maybe`
 
@@ -94,7 +100,7 @@ double(Err('e')); // Err('e')
 
 ### `bind`
 
-Useful for modeling any form of validation and rail way programming **TODO insert link to the talk and article**.
+Useful for modeling any sort of validation and for [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/).
 
 ```ts
 const { map, bind, Ok, Err } = MyRes;
@@ -146,4 +152,45 @@ export interface Pipe {
 export const pipe: Pipe = (...fns: Array<Fn<any, any>>): Fn<any, any> => (
   input: any
 ) => fns.reduce((prev: any, fn: Fn<any, any>) => fn(prev), input);
+```
+
+## `match` & `if` for `Maybe` and `Result`
+
+These functions came from [ts-union](https://github.com/twop/ts-union) library but still useful to mention them here
+
+### for `Maybe`
+
+```ts
+const { match, Just, Nothing } = Maybe;
+
+match(Just(1), { Just: n => n, Nothing: () => 0 }); // 1
+
+//curried version
+const valueOrZero = match({ Just: (n: number) => n, Nothing: () => 0 });
+valueOrZero(Just(1)); // 1
+valueOrZero(Nothing<number>()); // 0
+
+const val = Just(1);
+Maybe.if.Just(val, n => n, () => 0); // 1
+```
+
+### for `Result`
+
+```ts
+const { match, Ok, Err } = MyRes;
+
+match(Ok(1), { Ok: n => n, Err: _ => -1 }); // 1
+match(Err<number>('err'), { Ok: n => n.toString(), Err: s => s }); // 'err'
+
+//curried version
+const toStrOrErr = match({
+  Ok: (n: number) => n.toString(),
+  Err: e => e
+});
+
+toStrOrErr(Ok(1)); // '1'
+toStrOrErr(Err<number>('err')); // 'err'
+
+const val = Ok(1);
+MyRes.if.Ok(val, n => n, () => 0); // 1
 ```

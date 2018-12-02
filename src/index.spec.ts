@@ -1,7 +1,7 @@
 import { Maybe, pipe, buildResultWithErr } from './index';
 
 describe('Maybe', () => {
-  const { map, bind, Just, Nothing } = Maybe;
+  const { map, bind, Just, match, Nothing } = Maybe;
 
   describe('map', () => {
     it('maps Just -> Just', () => {
@@ -41,6 +41,22 @@ describe('Maybe', () => {
     });
   });
 
+  // this is handled by ts-union but just to double check
+  describe('match', () => {
+    it('matches with value right away', () => {
+      expect(match(Just(1), { Just: n => n + 1, Nothing: () => -1 })).toBe(2);
+      expect(
+        match(Nothing<number>(), { Just: n => n + 1, Nothing: () => -1 })
+      ).toBe(-1);
+    });
+
+    it('match is also curried', () => {
+      const valueOrZero = match({ Just: (n: number) => n, Nothing: () => 0 });
+      expect(valueOrZero(Just(1))).toBe(1);
+      expect(valueOrZero(Nothing<number>())).toBe(0);
+    });
+  });
+
   describe('pipe', () => {
     it('can glue map and bind', () => {
       const toStrAndBack = pipe(
@@ -58,7 +74,7 @@ describe('Maybe', () => {
 });
 
 describe('Result', () => {
-  const { map, bind, Ok, Err } = buildResultWithErr<string>();
+  const { map, bind, Ok, Err, match } = buildResultWithErr<string>();
 
   describe('map', () => {
     it('maps Ok a -> Ok b', () => {
@@ -95,6 +111,25 @@ describe('Result', () => {
 
       expect(stringify(Ok(1))).toEqual(Ok('1'));
       expect(stringify(Err('err'))).toEqual(Err('err'));
+    });
+  });
+
+  // this is handled by ts-union but just to double check
+  describe('match', () => {
+    it('matches with value right away', () => {
+      expect(match(Ok(1), { Ok: n => n + 1, Err: _ => -1 })).toBe(2);
+      expect(
+        match(Err<number>('err'), { Ok: n => n.toString(), Err: s => s })
+      ).toBe('err');
+    });
+
+    it('match is also curried', () => {
+      const toStrOrErr = match({
+        Ok: (n: number) => n.toString(),
+        Err: e => e
+      });
+      expect(toStrOrErr(Ok(1))).toBe('1');
+      expect(toStrOrErr(Err<number>('err'))).toBe('err');
     });
   });
 
